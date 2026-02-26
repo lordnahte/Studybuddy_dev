@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Login - StudyBuddy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f8fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            padding: 0.7rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            padding: 0.7rem;
+            background: #3a7ca5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>StudyBuddy Login</h2>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDrYItXUqdvCs181pOjcKM2rojKxNlV458",
+  authDomain: "studybuddy-545e6.firebaseapp.com",
+  projectId: "studybuddy-545e6",
+  storageBucket: "studybuddy-545e6.firebasestorage.app",
+  messagingSenderId: "608044097764",
+  appId: "1:608044097764:web:e5524be095c940fb590cf1",
+  measurementId: "G-HKLJ6R523P"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+    // Login function
+    window.login = function() {
+        const email = document.getElementById("email").value;
+        const pass = document.getElementById("password").value;
+
+        signInWithEmailAndPassword(auth, email, pass)
+            .then(() => {
+                window.location.href = "Study.html"; // redirect after login
+            })
+            .catch(err => alert(err.message));
+    }
+</script>
+
+</body>
+</html>
+
