@@ -53,6 +53,20 @@
             margin: 2rem 0 1rem 0;
             font-size: 0.95rem;
         }
+        
+        .timers {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .timers p {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+
+        .timers button {
+            margin: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -69,17 +83,68 @@
             Select your year level to get started:
         </p>
         'shows the buttons for the year levels'
-        <div class="year-links">
-            <a class="year-link" href="#">Year 7</a>
-            <a class="year-link" href="#">Year 8</a>
-            <a class="year-link" href="#">Year 9</a>
-            <a class="year-link" href="#">Year 10</a>
-            <a class="year-link" href="#">Year 11</a>
-            <a class="year-link" href="#">Year 12</a>
+        <div class="timers">
+            <h3>Stay Healthy While Studying</h3>
+
+            <p>💧 Water Break in: <span id="waterTimer">30:00</span></p>
+            <p>🚶 Move Around in: <span id="moveTimer">60:00</span></p>
+
+            <button onclick="startTimers()">Start Timers</button>
+            <button onclick="resetTimers()">Reset</button>
         </div>
     </main>
     <footer>
         &copy; 2026 StudyBuddy. Helping students achieve their best.
     </footer>
+
+    <script>
+    let waterTime = 1800; // 30 mins in seconds
+    let moveTime = 3600;  // 60 mins in seconds
+
+    let waterInterval;
+    let moveInterval;
+
+    function formatTime(seconds) {
+        const min = Math.floor(seconds / 60);
+        const sec = seconds % 60;
+        return `${min}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function startTimers() {
+        clearInterval(waterInterval);
+        clearInterval(moveInterval);
+
+        waterInterval = setInterval(() => {
+            waterTime--;
+            document.getElementById("waterTimer").textContent = formatTime(waterTime);
+
+            if (waterTime <= 0) {
+                alert("💧 Time to drink water!");
+                waterTime = 1800;
+            }
+        }, 1000);
+
+        moveInterval = setInterval(() => {
+            moveTime--;
+            document.getElementById("moveTimer").textContent = formatTime(moveTime);
+
+            if (moveTime <= 0) {
+                alert("🚶 Time to stand up and move around!");
+                moveTime = 3600;
+            }
+        }, 1000);
+    }
+
+    function resetTimers() {
+        clearInterval(waterInterval);
+        clearInterval(moveInterval);
+
+        waterTime = 1800;
+        moveTime = 3600;
+
+        document.getElementById("waterTimer").textContent = "30:00";
+        document.getElementById("moveTimer").textContent = "60:00";
+    }
+    </script>
 </body>
 </html>
