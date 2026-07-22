@@ -4,131 +4,328 @@
     <meta charset="UTF-8">
     <title>StudyBuddy - Home</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #EEF3F1;
+            --surface: #FFFFFF;
+            --ink: #21313A;
+            --ink-soft: #5B6B70;
+            --brand: #2F6F5E;
+            --brand-dark: #234F42;
+            --accent: #E7A445;
+            --border: #D8E4DF;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f8fb;
+            font-family: 'Inter', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
             margin: 0;
             padding: 0;
+            min-height: 100vh;
         }
+
         header {
-            background: #3a7ca5;
+            background: var(--brand);
             color: #fff;
-            padding: 1.5rem 0;
+            padding: 1.75rem 1.5rem;
             text-align: center;
+            position: relative;
         }
+        header h1 {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 1.9rem;
+            margin: 0 0 0.25rem;
+            letter-spacing: -0.01em;
+        }
+        header p {
+            margin: 0;
+            opacity: 0.85;
+            font-size: 0.92rem;
+        }
+
+        #signOutBtn {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.5rem;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.35);
+            color: #fff;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+        #signOutBtn:hover { background: rgba(255,255,255,0.25); }
+
         main {
-            max-width: 600px;
+            max-width: 640px;
             margin: 2rem auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            padding: 2rem;
+            background: var(--surface);
+            border-radius: 14px;
+            box-shadow: 0 20px 40px -25px rgba(35, 79, 66, 0.3);
+            border: 1px solid var(--border);
+            padding: 2.25rem;
         }
-        h1 {
+
+        h2 {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
             margin-top: 0;
         }
-        .year-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
-            margin: 2rem 0;
+
+        main > p {
+            color: var(--ink-soft);
+            line-height: 1.55;
         }
-        .year-link {
-            background: #eaf1fb;
-            color: #3a7ca5;
-            padding: 1rem 2rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .year-link:hover {
-            background: #d0e3fa;
-        }
-        footer {
-            text-align: center;
-            color: #888;
-            margin: 2rem 0 1rem 0;
-            font-size: 0.95rem;
-        }
-        
+
         .timers {
+            margin-top: 2.25rem;
+        }
+
+        .timers h3 {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
             text-align: center;
+            margin-bottom: 1.75rem;
+        }
+
+        .rings {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .ring-wrap {
+            text-align: center;
+        }
+
+        .ring {
+            --progress: 0;
+            width: 132px;
+            height: 132px;
+            border-radius: 50%;
+            background: conic-gradient(var(--ring-color, var(--brand)) calc(var(--progress) * 1%), var(--border) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            transition: background 0.3s linear;
+        }
+        .ring-inner {
+            width: 106px;
+            height: 106px;
+            border-radius: 50%;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .ring-inner .icon { font-size: 1.4rem; margin-bottom: 0.15rem; }
+        .ring-inner .time {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .ring-label {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            font-weight: 500;
+        }
+
+        .ring-water { --ring-color: var(--brand); }
+        .ring-move { --ring-color: var(--accent); }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
             margin-top: 2rem;
         }
 
-        .timers p {
-            font-size: 1.2rem;
-            margin: 1rem 0;
+        .timer-controls button {
+            padding: 0.65rem 1.4rem;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.05s ease;
+        }
+        .timer-controls button:active { transform: translateY(1px); }
+
+        #startBtn {
+            background: var(--brand);
+            color: #fff;
+        }
+        #startBtn:hover:not(:disabled) { background: var(--brand-dark); }
+        #startBtn:disabled {
+            background: #A9BEB6;
+            cursor: not-allowed;
         }
 
-        .timers button {
-            margin: 0.5rem;
+        #resetBtn {
+            background: #F1F5F1;
+            color: var(--ink);
+            border: 1px solid var(--border);
         }
+        #resetBtn:hover { background: #E4EBE6; }
+
+        footer {
+            text-align: center;
+            color: var(--ink-soft);
+            margin: 2rem 0 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        .loading-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--ink-soft);
+            font-family: 'Inter', Arial, sans-serif;
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    
+
+<div id="loadingScreen" class="loading-screen">
+    <p>Checking your session…</p>
+</div>
+
+<div id="appContent" class="hidden">
     <header>
         <h1>StudyBuddy</h1>
         <p>Your companion for Years 7-12 study success</p>
+        <button id="signOutBtn">Sign out</button>
     </header>
     <main>
         <h2>Welcome!</h2>
         <p>
-            StudyBuddy is here to help students in Years 7 to 12 with healthy study habits and being able to pace themselves in their studying:
+            StudyBuddy is here to help students in Years 7 to 12 with healthy study habits and being able to pace themselves in their studying.
         </p>
-        
+
         <div class="timers">
             <h3>Stay Healthy While Studying</h3>
 
-            <p>💧 Water Break in: <span id="waterTimer">30:00</span></p>
-            <p>🚶 Move Around in: <span id="moveTimer">60:00</span></p>
+            <div class="rings">
+                <div class="ring-wrap">
+                    <div class="ring ring-water" id="waterRing">
+                        <div class="ring-inner">
+                            <span class="icon">💧</span>
+                            <span class="time" id="waterTimer">30:00</span>
+                        </div>
+                    </div>
+                    <div class="ring-label">Water break</div>
+                </div>
+                <div class="ring-wrap">
+                    <div class="ring ring-move" id="moveRing">
+                        <div class="ring-inner">
+                            <span class="icon">🚶</span>
+                            <span class="time" id="moveTimer">60:00</span>
+                        </div>
+                    </div>
+                    <div class="ring-label">Move around</div>
+                </div>
+            </div>
 
-            <button onclick="startTimers()">Start Timers</button>
-            <button onclick="resetTimers()">Reset</button>
+            <div class="timer-controls">
+                <button id="startBtn">Start timers</button>
+                <button id="resetBtn">Reset</button>
+            </div>
         </div>
     </main>
     <footer>
         &copy; 2026 StudyBuddy. Helping students achieve their best.
     </footer>
+</div>
 
-    <script>
-    let waterTime = 1800; // 30 mins in seconds
-    let moveTime = 3600;  // 60 mins in seconds
+<script type="module">
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { auth } from "./firebase-config.js";
 
-    let waterInterval;
-    let moveInterval;
+    const loadingScreen = document.getElementById("loadingScreen");
+    const appContent = document.getElementById("appContent");
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            loadingScreen.classList.add("hidden");
+            appContent.classList.remove("hidden");
+        } else {
+            window.location.href = "index.html";
+        }
+    });
+
+    document.getElementById("signOutBtn").addEventListener("click", () => {
+        signOut(auth).then(() => {
+            window.location.href = "index.html";
+        });
+    });
+
+    // --- Timers ---
+    const WATER_TOTAL = 1800; // 30 mins in seconds
+    const MOVE_TOTAL = 3600;  // 60 mins in seconds
+
+    let waterTime = WATER_TOTAL;
+    let moveTime = MOVE_TOTAL;
+    let waterInterval = null;
+    let moveInterval = null;
+
+    const waterTimerEl = document.getElementById("waterTimer");
+    const moveTimerEl = document.getElementById("moveTimer");
+    const waterRing = document.getElementById("waterRing");
+    const moveRing = document.getElementById("moveRing");
+    const startBtn = document.getElementById("startBtn");
 
     function formatTime(seconds) {
         const min = Math.floor(seconds / 60);
         const sec = seconds % 60;
-        return `${min}:${sec.toString().padStart(2, '0')}`;
+        return `${min}:${sec.toString().padStart(2, "0")}`;
+    }
+
+    function updateRing(ringEl, remaining, total) {
+        const elapsedPct = ((total - remaining) / total) * 100;
+        ringEl.style.setProperty("--progress", elapsedPct.toFixed(2));
     }
 
     function startTimers() {
-        clearInterval(waterInterval);
-        clearInterval(moveInterval);
+        if (waterInterval || moveInterval) return;
+
+        startBtn.disabled = true;
+        startBtn.textContent = "Timers running…";
 
         waterInterval = setInterval(() => {
             waterTime--;
-            document.getElementById("waterTimer").textContent = formatTime(waterTime);
+            waterTimerEl.textContent = formatTime(waterTime);
+            updateRing(waterRing, waterTime, WATER_TOTAL);
 
             if (waterTime <= 0) {
                 alert("💧 Time to drink water!");
-                waterTime = 1800;
+                waterTime = WATER_TOTAL;
             }
         }, 1000);
 
         moveInterval = setInterval(() => {
             moveTime--;
-            document.getElementById("moveTimer").textContent = formatTime(moveTime);
+            moveTimerEl.textContent = formatTime(moveTime);
+            updateRing(moveRing, moveTime, MOVE_TOTAL);
 
             if (moveTime <= 0) {
                 alert("🚶 Time to stand up and move around!");
-                moveTime = 3600;
+                moveTime = MOVE_TOTAL;
             }
         }, 1000);
     }
@@ -136,13 +333,23 @@
     function resetTimers() {
         clearInterval(waterInterval);
         clearInterval(moveInterval);
+        waterInterval = null;
+        moveInterval = null;
 
-        waterTime = 1800;
-        moveTime = 3600;
+        waterTime = WATER_TOTAL;
+        moveTime = MOVE_TOTAL;
 
-        document.getElementById("waterTimer").textContent = "30:00";
-        document.getElementById("moveTimer").textContent = "60:00";
+        waterTimerEl.textContent = "30:00";
+        moveTimerEl.textContent = "60:00";
+        updateRing(waterRing, WATER_TOTAL, WATER_TOTAL);
+        updateRing(moveRing, MOVE_TOTAL, MOVE_TOTAL);
+
+        startBtn.disabled = false;
+        startBtn.textContent = "Start timers";
     }
-    </script>
+
+    document.getElementById("startBtn").addEventListener("click", startTimers);
+    document.getElementById("resetBtn").addEventListener("click", resetTimers);
+</script>
 </body>
 </html>
