@@ -198,6 +198,80 @@
             font-family: 'Inter', Arial, sans-serif;
         }
         .hidden { display: none !important; }
+
+        /* --- Sticky notes --- */
+        .sticky-note {
+            position: fixed;
+            width: 190px;
+            min-height: 150px;
+            background: #FFF3B0;
+            border-radius: 4px;
+            box-shadow: 0 10px 20px -8px rgba(35, 79, 66, 0.35);
+            display: flex;
+            flex-direction: column;
+            z-index: 500;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+        .sticky-note.color-pink { background: #FFD6E5; }
+        .sticky-note.color-blue { background: #D6E9FF; }
+        .sticky-note.color-green { background: #DAF2D0; }
+
+        .sticky-note-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0.3rem 0.4rem;
+            cursor: grab;
+            touch-action: none;
+        }
+        .sticky-note-header:active { cursor: grabbing; }
+
+        .sticky-note-delete {
+            background: transparent;
+            border: none;
+            color: var(--ink-soft);
+            font-size: 1rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+        }
+        .sticky-note-delete:hover {
+            background: rgba(0,0,0,0.08);
+            color: var(--ink);
+        }
+
+        .sticky-note textarea {
+            flex: 1;
+            resize: none;
+            border: none;
+            background: transparent;
+            padding: 0 0.75rem 0.75rem;
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 0.9rem;
+            color: var(--ink);
+            outline: none;
+        }
+
+        #addNoteBtn {
+            position: fixed;
+            bottom: 1.75rem;
+            right: 1.75rem;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: none;
+            background: var(--brand);
+            color: #fff;
+            font-size: 1.6rem;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 10px 22px -8px rgba(35, 79, 66, 0.5);
+            z-index: 600;
+            transition: background 0.15s ease, transform 0.05s ease;
+        }
+        #addNoteBtn:hover { background: var(--brand-dark); }
+        #addNoteBtn:active { transform: translateY(1px); }
     </style>
 </head>
 <body>
@@ -251,6 +325,9 @@
     <footer>
         &copy; 2026 StudyBuddy. Helping students achieve their best.
     </footer>
+
+    <div id="notesContainer"></div>
+    <button id="addNoteBtn" title="Add sticky note">+</button>
 </div>
 
 <script>
@@ -263,6 +340,7 @@
             if (data.loggedIn) {
                 loadingScreen.classList.add("hidden");
                 appContent.classList.remove("hidden");
+                loadNotes();
             } else {
                 window.location.href = "/";
             }
@@ -352,6 +430,131 @@
 
     document.getElementById("startBtn").addEventListener("click", startTimers);
     document.getElementById("resetBtn").addEventListener("click", resetTimers);
+
+    // --- Sticky notes ---
+    const notesContainer = document.getElementById("notesContainer");
+    const addNoteBtn = document.getElementById("addNoteBtn");
+    const NOTE_COLORS = ["", "color-pink", "color-blue", "color-green"]; // "" = default yellow
+
+    let notes = [];
+    let saveTimeout = null;
+
+    function scheduleSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(saveNotes, 600);
+    }
+
+    function saveNotes() {
+        fetch("/api/notes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ notes })
+        }).catch(() => { /* best-effort; ignore network hiccups */ });
+    }
+
+    function loadNotes() {
+        fetch("/api/notes")
+            .then((res) => res.json())
+            .then((data) => {
+                notes = Array.isArray(data.notes) ? data.notes : [];
+                notes.forEach(renderNote);
+            })
+            .catch(() => { /* start with an empty board if this fails */ });
+    }
+
+    function makeId() {
+        return "n_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+    }
+
+    function renderNote(note) {
+        const el = document.createElement("div");
+        el.className = "sticky-note" + (note.color ? ` ${note.color}` : "");
+        el.style.left = note.x + "px";
+        el.style.top = note.y + "px";
+        el.dataset.id = note.id;
+
+        const header = document.createElement("div");
+        header.className = "sticky-note-header";
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "sticky-note-delete";
+        deleteBtn.textContent = "✕";
+        deleteBtn.title = "Delete note";
+        deleteBtn.addEventListener("click", () => {
+            notes = notes.filter((n) => n.id !== note.id);
+            el.remove();
+            scheduleSave();
+        });
+
+        header.appendChild(deleteBtn);
+
+        const textarea = document.createElement("textarea");
+        textarea.value = note.text || "";
+        textarea.placeholder = "Write a note…";
+        textarea.addEventListener("input", () => {
+            note.text = textarea.value;
+            scheduleSave();
+        });
+
+        el.appendChild(header);
+        el.appendChild(textarea);
+        notesContainer.appendChild(el);
+
+        makeDraggable(el, header, note);
+    }
+
+    function makeDraggable(el, handle, note) {
+        let dragging = false;
+        let startX = 0;
+        let startY = 0;
+        let originX = 0;
+        let originY = 0;
+
+        function onPointerDown(e) {
+            dragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            originX = el.offsetLeft;
+            originY = el.offsetTop;
+            handle.setPointerCapture(e.pointerId);
+        }
+
+        function onPointerMove(e) {
+            if (!dragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const newX = Math.max(0, originX + dx);
+            const newY = Math.max(0, originY + dy);
+            el.style.left = newX + "px";
+            el.style.top = newY + "px";
+            note.x = newX;
+            note.y = newY;
+        }
+
+        function onPointerUp() {
+            if (!dragging) return;
+            dragging = false;
+            scheduleSave();
+        }
+
+        handle.addEventListener("pointerdown", onPointerDown);
+        handle.addEventListener("pointermove", onPointerMove);
+        handle.addEventListener("pointerup", onPointerUp);
+        handle.addEventListener("pointercancel", onPointerUp);
+    }
+
+    addNoteBtn.addEventListener("click", () => {
+        const note = {
+            id: makeId(),
+            x: 60 + Math.random() * 120,
+            y: 100 + Math.random() * 120,
+            text: "",
+            color: NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)]
+        };
+        notes.push(note);
+        renderNote(note);
+        scheduleSave();
+    });
 </script>
 </body>
 </html>

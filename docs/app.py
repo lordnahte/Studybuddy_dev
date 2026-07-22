@@ -9,7 +9,14 @@ app.secret_key = "dev-secret-change-me"  # fine for local testing only
 # email (lowercase) -> password hash
 users = {}
 
+# email (lowercase) -> list of note dicts: {id, x, y, text, color}
+notes_store = {}
+
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def current_user():
+    return session.get('user')
 
 
 @app.route('/')
@@ -73,5 +80,43 @@ def get_session():
     return jsonify(loggedIn=False)
 
 
+@app.route('/api/notes', methods=['GET'])
+def get_notes():
+    user = current_user()
+    if not user:
+        return jsonify(error="Not logged in."), 401
+    return jsonify(notes=notes_store.get(user, []))
+
+
+@app.route('/api/notes', methods=['POST'])
+def save_notes():
+    user = current_user()
+    if not user:
+        return jsonify(error="Not logged in."), 401
+
+    data = request.get_json(silent=True) or {}
+    notes = data.get('notes')
+
+    if not isinstance(notes, list):
+        return jsonify(error="Invalid notes payload."), 400
+
+    # Basic shape-check on each note so garbage can't get stored
+    clean_notes = []
+    for n in notes:
+        if not isinstance(n, dict):
+            continue
+        clean_notes.append({
+            "id": str(n.get("id", "")),
+            "x": float(n.get("x", 0) or 0),
+            "y": float(n.get("y", 0) or 0),
+            "text": str(n.get("text", ""))[:2000],
+            "color": str(n.get("color", "yellow"))
+        })
+
+    notes_store[user] = clean_notes
+    return jsonify(ok=True)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+    
